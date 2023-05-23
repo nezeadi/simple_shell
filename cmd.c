@@ -33,19 +33,33 @@ void execute_cmd(char **args)
 	pid_t pid;
 	int status;
 
-	pid = fork();
-	if (pid == 0)
+	if (strcmp(args[0], "env") == 0)
 	{
-		if (execvp(args[0], args) == -1)
+		int i;
+
+		for (i = 0; environ[i] != NULL; i++)
+		{
+			printf("%s\n", environ[i]);
+		}
+	}
+	else
+	{
+		pid = fork();
+		if (pid == 0)
+		{
+			if (execvp(args[0], args) == -1)
+				perror("hsh");
+			exit(EXIT_FAILURE);
+		}
+		else if (pid < 0)
+		{
 			perror("hsh");
-		exit(EXIT_FAILURE);
-	} else if (pid < 0)
-	{
-		perror("hsh");
-	} else
-	{
-		do {
-			waitpid(pid, &status, WUNTRACED);
-		} while (!WIFEXITED(status) && !WIFSIGNALED(status));
+		}
+		else
+		{
+			do {
+				waitpid(pid, &status, WUNTRACED);
+			} while (!WIFEXITED(status) && !WIFSIGNALED(status));
+		}
 	}
 }
