@@ -14,15 +14,21 @@ int main(void)
 	while (1)
 	{
 		printf("> ");
-		fgets(cmd, MAX_CMD_LENGTH, stdin);
+
+		if (fgets(cmd, MAX_CMD_LENGTH, stdin) == NULL)
+		{
+			printf("\n");
+			return (0);
+		}
+
 		cmd[strcspn(cmd, "\n")] = 0;
 
 		if (strcmp(cmd, "exit") == 0)
 			return (0);
+
 		args = parse_cmd(cmd);
 		execute_cmd(args);
 		free(args);
 	}
-
 	return (0);
 }

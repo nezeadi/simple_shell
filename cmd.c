@@ -9,15 +9,18 @@
 
 char **parse_cmd(char *cmd)
 {
-	int i;
-	char **args = malloc(MAX_NUM_ARGS * sizeof(char *));
+	int i = 0;
+	char **args = malloc((MAX_NUM_ARGS + 1) * sizeof(char *));
 	char *token = strtok(cmd, " ");
 
-	for (i = 0; i < MAX_NUM_ARGS; i++)
+	while (token != NULL && i < MAX_NUM_ARGS)
 	{
-		args[i] = token;
+		args[i++] = token;
 		token = strtok(NULL, " ");
 	}
+
+	args[i] = NULL;
+
 	return (args);
 }
 
@@ -33,7 +36,10 @@ void execute_cmd(char **args)
 	pid_t pid;
 	int status;
 
-	if (strcmp(args[0], "env") == 0)
+	if (args[0] == NULL)
+	{
+		return;
+	} else if (strcmp(args[0], "env") == 0)
 	{
 		int i;
 
@@ -41,21 +47,20 @@ void execute_cmd(char **args)
 		{
 			printf("%s\n", environ[i]);
 		}
-	}
-	else
+	} else
 	{
 		pid = fork();
 		if (pid == 0)
 		{
 			if (execvp(args[0], args) == -1)
-				perror("hsh");
-			exit(EXIT_FAILURE);
-		}
-		else if (pid < 0)
+			{
+				perror(args[0]);
+				exit(EXIT_FAILURE);
+			}
+		} else if (pid < 0)
 		{
-			perror("hsh");
-		}
-		else
+			perror(args[0]);
+		} else
 		{
 			do {
 				waitpid(pid, &status, WUNTRACED);
